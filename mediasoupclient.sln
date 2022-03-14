@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.32126.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mediasoupclient", "mediasoupclient.vcxproj", "{BB8B6EF2-DE6E-4641-A939-AC8A87FB0315}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestMediasoupClient", "..\TestMediasoupClient\TestMediasoupClient.vcxproj", "{D5795C8D-8B10-4713-97B1-17AEF309376F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mediasoup_test_console", "..\..\mediasoup_test_console\mediasoup_test_console.vcxproj", "{27F11355-D465-47F2-BBA9-17904E050571}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +23,14 @@ Global
 		{BB8B6EF2-DE6E-4641-A939-AC8A87FB0315}.Release|x64.Build.0 = Release|x64
 		{BB8B6EF2-DE6E-4641-A939-AC8A87FB0315}.Release|x86.ActiveCfg = Release|Win32
 		{BB8B6EF2-DE6E-4641-A939-AC8A87FB0315}.Release|x86.Build.0 = Release|Win32
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Debug|x64.ActiveCfg = Debug|x64
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Debug|x64.Build.0 = Debug|x64
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Debug|x86.ActiveCfg = Debug|Win32
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Debug|x86.Build.0 = Debug|Win32
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Release|x64.ActiveCfg = Release|x64
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Release|x64.Build.0 = Release|x64
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Release|x86.ActiveCfg = Release|Win32
-		{D5795C8D-8B10-4713-97B1-17AEF309376F}.Release|x86.Build.0 = Release|Win32
+		{27F11355-D465-47F2-BBA9-17904E050571}.Debug|x64.ActiveCfg = Debug|x64
+		{27F11355-D465-47F2-BBA9-17904E050571}.Debug|x64.Build.0 = Debug|x64
+		{27F11355-D465-47F2-BBA9-17904E050571}.Debug|x86.ActiveCfg = Debug|Win32
+		{27F11355-D465-47F2-BBA9-17904E050571}.Debug|x86.Build.0 = Debug|Win32
+		{27F11355-D465-47F2-BBA9-17904E050571}.Release|x64.ActiveCfg = Release|x64
+		{27F11355-D465-47F2-BBA9-17904E050571}.Release|x64.Build.0 = Release|x64
+		{27F11355-D465-47F2-BBA9-17904E050571}.Release|x86.ActiveCfg = Release|Win32
+		{27F11355-D465-47F2-BBA9-17904E050571}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

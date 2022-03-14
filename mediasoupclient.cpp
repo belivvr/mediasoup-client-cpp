@@ -12,8 +12,8 @@ using namespace std;
 #else
 #define DLL_EXPORT
 #endif
-#include <atlbase.h>
-#include <atlconv.h>
+
+using namespace mediasoupclient;
 
 extern "C"
 {
@@ -27,14 +27,14 @@ extern "C"
 		return new mediasoupclient::Device();
 	}
 
-	DLL_EXPORT const nlohmann::json& GetSctpCapabilities(mediasoupclient::Device* device)
+	DLL_EXPORT const nlohmann::json* GetSctpCapabilities(mediasoupclient::Device* device)
 	{
-		return device->GetSctpCapabilities();
+		return &device->GetSctpCapabilities();
 	}
 
-	DLL_EXPORT const nlohmann::json& GetRtpCapabilities(mediasoupclient::Device* device)
+	DLL_EXPORT const nlohmann::json* GetRtpCapabilities(mediasoupclient::Device* device)
 	{
-		return device->GetRtpCapabilities();
+		return &device->GetRtpCapabilities();
 	}
 
 	DLL_EXPORT bool IsLoaded(mediasoupclient::Device* device)
@@ -42,20 +42,21 @@ extern "C"
 		return device->IsLoaded();
 	}
 
+	DLL_EXPORT void DeviceLoad(Device* device, const nlohmann::json* rtpCapabilities, const PeerConnection::Options* peerConnectionOptions = nullptr)
+	{
+		device->Load(*rtpCapabilities, peerConnectionOptions);
+	}
+
 	DLL_EXPORT void CleanUp()
 	{
 		mediasoupclient::Cleanup();
 	}
 
-	DLL_EXPORT LPWSTR Version()
+	DLL_EXPORT void __stdcall Version(char* text, size_t bufferSize)
 	{
-		string* versionText = new string(mediasoupclient::Version());
-		string* testString = new string("테스트 문자열인데 이건 어떻게 되나요?");
-		delete versionText;
-		LPWSTR test = (LPWSTR)testString->c_str();
-		vector<wchar_t> data(wcslen(test) + 1);
-		wcscpy_s(data.data(), data.size(), test);
-		auto* result = data.data();
-		return result;
+		//C# CallingConvention.stdCall
+		strcpy_s(text, bufferSize, mediasoupclient::Version().c_str());
 	}
+
+	
 }
