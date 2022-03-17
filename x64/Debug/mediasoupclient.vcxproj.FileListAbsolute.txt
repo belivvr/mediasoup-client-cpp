@@ -1,3 +1,0 @@
-C:\Users\dongh\source\repos\mediasoupclient\x64\Debug\mediasoupclient.dll.lastcodeanalysissucceeded
-C:\Users\dongh\source\repos\mediasoupclient\x64\Debug\NativeCodeAnalysis.read.1.tlog
-C:\Users\dongh\source\repos\mediasoupclient\x64\Debug\mediasoupclient.dll
