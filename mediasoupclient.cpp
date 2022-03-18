@@ -230,6 +230,356 @@ extern "C"
 			return nullptr;
 		return recvTransport->Consume(consumerListener, id, producerId, kind, rtpParameters, appData);
 	}
+
+	//Check Pointer return 할당해서 돌려주는지 포인터에 복사하는지 체크할 필요 있음 소스코드 보고
+	DLL_EXPORT DataConsumer* ConsumeData(
+		RecvTransport* recvTransport,
+		DataConsumer::Listener* listener,
+		const std::string& id,
+		const std::string& producerId,
+		const uint16_t streamId,
+		const std::string& label,
+		const std::string& protocol = std::string(),
+		const nlohmann::json& appData = nlohmann::json::object()
+		)
+	{
+		if (recvTransport == nullptr || listener == nullptr)
+			return nullptr;
+		recvTransport->ConsumeData(listener, id, producerId, streamId, label, protocol, appData);
+	}
 #pragma endregion
 
+#pragma region Producer
+	DLL_EXPORT const string& GetId(Producer* producer)
+	{
+		if (producer == nullptr)
+			return "";
+		return producer->GetId();
+	}
+	
+	DLL_EXPORT string GetKind(Producer* producer)
+	{
+		if (producer == nullptr)
+			return "";
+		return producer->GetKind();//Return audio or video
+	}
+
+	DLL_EXPORT webrtc::MediaStreamTrackInterface* GetTrack(Producer* producer)
+	{
+		if (producer == nullptr)
+			return nullptr;
+		return producer->GetTrack();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetRtpParameters(Producer* producer)
+	{
+		if (producer == nullptr)
+			return nlohmann::json::object();
+		return producer->GetRtpParameters();
+	}
+
+	DLL_EXPORT const uint8_t GetMaxSpatialLayer(Producer* producer)
+	{
+		if (producer == nullptr)
+			return 0;
+		return producer->GetMaxSpatialLayer();
+	}
+
+	DLL_EXPORT nlohmann::json GetStats(Producer* producer)
+	{
+		if (producer == nullptr)
+			return nlohmann::json::object();
+		return producer->GetStats();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetAppData(Producer* producer)
+	{
+		if (producer == nullptr)
+			return nlohmann::json::object();
+		return producer->GetAppData();
+	}
+
+	DLL_EXPORT bool IsClosed(Producer* producer)
+	{
+		if (producer == nullptr)
+			return true;
+		return producer->IsClosed();
+	}
+
+	DLL_EXPORT bool IsPaused(Producer* producer)
+	{
+		if (producer == nullptr)
+			return false;
+		return producer->IsPaused();
+	}
+
+	DLL_EXPORT void Close(Producer* producer)
+	{
+		if (producer == nullptr)
+			return;
+		producer->Close();
+	}
+
+	DLL_EXPORT void Pause(Producer* producer)
+	{
+		if (producer == nullptr)
+			return;
+		producer->Pause();
+	}
+
+	DLL_EXPORT void Resume(Producer* producer)
+	{
+		if (producer == nullptr)
+			return;
+		producer->Resume();
+	}
+
+	DLL_EXPORT void ReplaceTrack(Producer* producer, webrtc::MediaStreamTrackInterface* track)
+	{
+		if (producer == nullptr || track == nullptr)
+			return;
+		producer->ReplaceTrack(track);
+	}
+
+	DLL_EXPORT void SetMaxSpatialLayer(Producer* producer, uint8_t spatialLayer)
+	{
+		if (producer == nullptr)
+			return;
+		producer->SetMaxSpatialLayer(spatialLayer);
+	}
+#pragma endregion
+
+#pragma region Consumer
+	DLL_EXPORT const string& GetId(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return "";
+		return consumer->GetId();
+	}
+
+	DLL_EXPORT const string& GetProducerId(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return "";
+		return consumer->GetProducerId();
+	}
+
+	DLL_EXPORT string GetKind(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return "";
+		return consumer->GetKind();//Return audio or video
+	}
+
+	DLL_EXPORT webrtc::MediaStreamTrackInterface* GetTrack(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return nullptr;
+		return consumer->GetTrack();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetRtpParameters(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return nlohmann::json::object();
+		return consumer->GetRtpParameters();
+	}
+
+	DLL_EXPORT nlohmann::json GetStats(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return nlohmann::json::object();
+		return consumer->GetStats();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetAppData(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return nlohmann::json::object();
+		return consumer->GetAppData();
+	}
+
+	DLL_EXPORT bool IsClosed(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return true;
+		return consumer->IsClosed();
+	}
+
+	DLL_EXPORT bool IsPaused(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return false;
+		return consumer->IsPaused();
+	}
+
+	DLL_EXPORT void Close(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return;
+		consumer->Close();
+	}
+
+	DLL_EXPORT void Pause(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return;
+		consumer->Pause();
+	}
+
+	DLL_EXPORT void Resume(Consumer* consumer)
+	{
+		if (consumer == nullptr)
+			return;
+		consumer->Resume();
+	}
+#pragma endregion
+	
+#pragma region DataProducer
+	DLL_EXPORT const string& GetId(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return "";
+		return dataProducer->GetId();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetSctpStreamParameters (DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return nlohmann::json::object();
+		return dataProducer->GetSctpStreamParameters();
+	}
+
+	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyState(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return  webrtc::DataChannelInterface::DataState::kClosed;
+		return dataProducer->GetReadyState();
+	}
+
+	DLL_EXPORT const string& GetLabel(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return  "";
+		return dataProducer->GetLabel();
+	}
+
+	DLL_EXPORT const string& GetProtocol(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return  "";
+		return dataProducer->GetProtocol();
+	}
+
+	DLL_EXPORT const uint8_t GetBufferedAmount(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return  -1;
+		return dataProducer->GetBufferedAmount();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetAppData(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return  nlohmann::json::object();
+		return dataProducer->GetAppData();
+	}
+
+	DLL_EXPORT bool IsClosed(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return true;
+		return dataProducer->IsClosed();
+	}
+
+	DLL_EXPORT void Close(DataProducer* dataProducer)
+	{
+		if (dataProducer == nullptr)
+			return;
+		dataProducer->Close();
+	}
+
+	DLL_EXPORT void Send(DataProducer* dataProducer, webrtc::DataBuffer& buffer)
+	{
+		if (dataProducer == nullptr)
+			return;
+		dataProducer->Send(buffer);
+	}
+#pragma endregion
+
+#pragma region DataConsumer
+	DLL_EXPORT const string& GetId(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return "";
+		return dataConsumer->GetId();
+	}
+
+	DLL_EXPORT const string& GetId(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return "";
+		return dataConsumer->GetDataProducerId();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetSctpStreamParameters(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return nlohmann::json::object();
+		return dataConsumer->GetSctpStreamParameters();
+	}
+
+	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyState(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return  webrtc::DataChannelInterface::DataState::kClosed;
+		return dataConsumer->GetReadyState();
+	}
+
+	DLL_EXPORT const string& GetLabel(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return  "";
+		return dataConsumer->GetLabel();
+	}
+
+	DLL_EXPORT const string& GetProtocol(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return  "";
+		return dataConsumer->GetProtocol();
+	}
+
+	DLL_EXPORT const nlohmann::json& GetAppData(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return  nlohmann::json::object();
+		return dataConsumer->GetAppData();
+	}
+
+	DLL_EXPORT bool IsClosed(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return true;
+		return dataConsumer->IsClosed();
+	}
+
+	DLL_EXPORT void Close(DataConsumer* dataConsumer)
+	{
+		if (dataConsumer == nullptr)
+			return;
+		dataConsumer->Close();
+	}
+
+	DLL_EXPORT void Send(DataProducer* dataProducer, webrtc::DataBuffer& buffer)
+	{
+		if (dataProducer == nullptr)
+			return;
+		dataProducer->Send(buffer);
+	}
+#pragma endregion
+
+#pragma region Logger
+
+#pragma endregion
 }
