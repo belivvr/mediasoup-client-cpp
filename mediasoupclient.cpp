@@ -59,7 +59,17 @@ extern "C"
 	{
 		if (device == nullptr)
 			return nullptr;
-		return &device->GetRtpCapabilities();
+		nlohmann::json* rtp = nullptr;
+		try
+		{
+			rtp = (nlohmann::json*)&device->GetRtpCapabilities();
+		}
+		catch(exception e)
+		{
+			e.what();
+		}
+
+		return rtp;
 	}
 
 	DLL_EXPORT bool IsLoaded(Device* device)
