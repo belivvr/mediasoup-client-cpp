@@ -15,6 +15,9 @@ using namespace std;
 
 using namespace mediasoupclient;
 
+const string currentDateTime();
+void ErrorLogging(exception e, string prefix="");
+
 ///<summary>
 /// check out below may help you understand
 /// https://mediasoup.org/documentation/v3/libmediasoupclient/api
@@ -25,7 +28,14 @@ extern "C"
 #pragma region mediasoup
 	DLL_EXPORT void Initialize()
 	{
-		mediasoupclient::Initialize();
+		try
+		{
+			mediasoupclient::Initialize();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e);
+		}
 	}
 
 	DLL_EXPORT void CleanUp()
@@ -33,9 +43,10 @@ extern "C"
 		mediasoupclient::Cleanup();
 	}
 
+	//C# CallingConvention.stdCall
+	//https://docs.microsoft.com/ko-kr/dotnet/api/system.runtime.interopservices.callingconvention?view=net-6.0
 	DLL_EXPORT void __stdcall Version(char* text, size_t bufferSize)
 	{
-		//C# CallingConvention.stdCall
 		if (text == nullptr)
 			return;
 		strcpy_s(text, bufferSize, mediasoupclient::Version().c_str());
@@ -52,7 +63,19 @@ extern "C"
 	{
 		if (device == nullptr)
 			return nullptr;
-		return &device->GetSctpCapabilities();
+
+		const nlohmann::json* resultPtr = nullptr;
+		try
+		{
+			resultPtr = &device->GetSctpCapabilities();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.GetSctpCapabilities]");
+			return (const nlohmann::json*)-1;
+		}
+
+		return resultPtr;
 	}
 
 	DLL_EXPORT const nlohmann::json* GetRtpCapabilities(mediasoupclient::Device* device)
@@ -66,7 +89,8 @@ extern "C"
 		}
 		catch(exception e)
 		{
-			e.what();
+			ErrorLogging(e, "[Device.GetRtpCapabilities]");
+			return (const nlohmann::json *)-1;
 		}
 
 		return rtp;
@@ -83,7 +107,14 @@ extern "C"
 	{
 		if (device == nullptr || rtpCapabilities == nullptr)
 			return;
-		device->Load(*rtpCapabilities, peerConnectionOptions);
+		try
+		{
+			device->Load(*rtpCapabilities, peerConnectionOptions);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.Load]");
+		}
 	}
 
 	DLL_EXPORT bool CanProduce(Device* device, const char* type)
@@ -106,12 +137,21 @@ extern "C"
 	{
 		if (device == nullptr || listener == nullptr)
 			return nullptr;
+		SendTransport* transport = nullptr;
+		
+		try
+		{
+			transport = device->CreateSendTransport(listener, iceParameters, iceCandidates, dtlsParameters, sctpParameters, peerConnectionOptions, appData);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.CreateSendTransport]");
+			return (SendTransport*)-1;
+		}
 
-		SendTransport* transport = device->CreateSendTransport(listener, iceParameters, iceCandidates, dtlsParameters, sctpParameters, peerConnectionOptions, appData);
 		return transport;
 	}
 
-	//TODO wrapping needed Overload exist
 	DLL_EXPORT RecvTransport* CreateRecvTransport(
 		Device* device,
 		RecvTransport::Listener* listener,
@@ -126,7 +166,17 @@ extern "C"
 		if (device == nullptr || listener == nullptr)
 			return nullptr;
 
-		RecvTransport* transport = device->CreateRecvTransport(listener, id, iceParameters, iceCandidates, dtlsParameters, sctpParameters, peerConnectionOptions, appData);
+		RecvTransport* transport = nullptr;
+		try
+		{
+			transport = device->CreateRecvTransport(listener, id, iceParameters, iceCandidates, dtlsParameters, sctpParameters, peerConnectionOptions, appData);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.CreateRecvTransport]");
+			return (RecvTransport*)-1;
+		}
+		
 		return transport;
 	}
 #pragma endregion
@@ -137,15 +187,37 @@ extern "C"
 	DLL_EXPORT const string GetId(Transport* transport)
 	{
 		if (transport == nullptr)
-			return nullptr;
-		return transport->GetId();
+			return "transport is null";
+		string id;
+		try
+		{
+			id = transport->GetId();
+		}
+		catch(exception e)
+		{
+			ErrorLogging(e, "[Transport.GetId]");
+			return "[Transport]GetId Error";
+		}
+		return id;
 	}
 
 	DLL_EXPORT const string GetConnectionState(Transport* transport)
 	{
 		if (transport == nullptr)
-			return nullptr;
-		return transport->GetConnectionState();
+			return "transport is null";
+
+		string state;
+		try
+		{
+			state = transport->GetConnectionState();
+		}
+		catch(exception e)
+		{
+			ErrorLogging(e, "[Transport.GetConnectionState]");
+			state = "Error Occurred";
+		}
+
+		return state;
 	}
 
 	DLL_EXPORT bool IsClosed(Transport* transport)
@@ -162,7 +234,19 @@ extern "C"
 		if (transport == nullptr)
 			return true;
 
-		return transport->GetStats();
+
+		nlohmann::json stat;
+		try
+		{
+			stat = transport->GetStats();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Transport.GetStats]");
+			stat = nlohmann::json::object();
+		}
+
+		return stat;
 	}
 
 	//API comment : This method should be called when the server side transport has been closed (and vice-versa)
@@ -171,7 +255,14 @@ extern "C"
 		if (transport == nullptr)
 			return;
 
-		transport->Close();
+		try
+		{
+			transport->Close();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Transport.Close]");
+		}
 	}
 
 	DLL_EXPORT void RestartIce(Transport* transport, const nlohmann::json& iceParameters)
@@ -179,15 +270,29 @@ extern "C"
 		if (transport == nullptr)
 			return;
 
-		transport->RestartIce(iceParameters);
+		try
+		{
+			transport->RestartIce(iceParameters);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Transport.RestartIce]");
+		}
+		
 	}
 
 	DLL_EXPORT void UpdateIceServers(Transport* transport, const nlohmann::json& iceServers = nlohmann::json())
 	{
 		if (transport == nullptr)
 			return;
-
-		transport->UpdateIceServers(iceServers);
+		try
+		{
+			transport->UpdateIceServers(iceServers);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Transport.UpdateIceServers]");
+		}
 	}
 
 	//Transport Event
@@ -220,7 +325,18 @@ extern "C"
 		int maxPacketLifeTime = 0,
 		const nlohmann::json& appData = nlohmann::json::object())
 	{
-		return sendTransport->ProduceData(listener, label, protocol, ordered, maxRetransmits, maxPacketLifeTime, appData);
+		DataProducer* dataProducer = nullptr;
+		try
+		{
+			dataProducer = sendTransport->ProduceData(listener, label, protocol, ordered, maxRetransmits, maxPacketLifeTime, appData);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[SendTransport.ProduceData]");
+			dataProducer = (DataProducer*)-1;
+		}
+
+		return dataProducer;
 	}
 
 	//SendTransport Listener
@@ -238,7 +354,18 @@ extern "C"
 	{
 		if (recvTransport == nullptr || consumerListener == nullptr)
 			return nullptr;
-		return recvTransport->Consume(consumerListener, id, producerId, kind, rtpParameters, appData);
+		Consumer* consumer = nullptr;
+		try
+		{
+			consumer = recvTransport->Consume(consumerListener, id, producerId, kind, rtpParameters, appData);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[RecvTransport.Consume]");
+			consumer = (Consumer*)-1;
+		}
+
+		return consumer;
 	}
 
 	//Check Pointer return 할당해서 돌려주는지 포인터에 복사하는지 체크할 필요 있음 소스코드 보고
@@ -255,7 +382,18 @@ extern "C"
 	{
 		if (recvTransport == nullptr || listener == nullptr)
 			return nullptr;
-		recvTransport->ConsumeData(listener, id, producerId, streamId, label, protocol, appData);
+		DataConsumer* dataConsumer = nullptr;
+		try
+		{
+			dataConsumer = recvTransport->ConsumeData(listener, id, producerId, streamId, label, protocol, appData);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[RecvTransport.ConsumeData]");
+			dataConsumer = (DataConsumer*)-1;
+		}
+		
+		return dataConsumer;
 	}
 #pragma endregion
 
@@ -264,49 +402,125 @@ extern "C"
 	{
 		if (producer == nullptr)
 			return "";
-		return producer->GetId();
+		string id;
+		try
+		{
+			id = producer->GetId();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetId]");
+			id = "Error GetId";
+		}
+
+		return id;
 	}
 	
 	DLL_EXPORT string GetKind(Producer* producer)
 	{
 		if (producer == nullptr)
 			return "";
-		return producer->GetKind();//Return audio or video
+
+		string kind;
+		try
+		{
+			kind = producer->GetKind();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetKind]");
+			kind = "Error Occurred";
+		}
+		
+		return kind;//Return audio or video
 	}
 
 	DLL_EXPORT webrtc::MediaStreamTrackInterface* GetTrack(Producer* producer)
 	{
 		if (producer == nullptr)
 			return nullptr;
-		return producer->GetTrack();
+		webrtc::MediaStreamTrackInterface* trackInterface = nullptr;
+		try
+		{
+			trackInterface = producer->GetTrack();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetTrack]");
+			trackInterface = (webrtc::MediaStreamTrackInterface*)-1;
+		}
+
+		return trackInterface;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetRtpParameters(Producer* producer)
 	{
 		if (producer == nullptr)
 			return nlohmann::json::object();
-		return producer->GetRtpParameters();
+
+		nlohmann::json parameters;
+		try
+		{
+			parameters = producer->GetRtpParameters();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetRtpParameters]");
+		}
+
+		return parameters;
 	}
 
 	DLL_EXPORT const uint8_t GetMaxSpatialLayer(Producer* producer)
 	{
 		if (producer == nullptr)
 			return 0;
-		return producer->GetMaxSpatialLayer();
+
+		uint8_t layer = -1;
+		try
+		{
+			layer = producer->GetMaxSpatialLayer();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetMaxSpatialLayer]");
+		}
+
+		return layer;
 	}
 
 	DLL_EXPORT nlohmann::json GetStatsProducer(Producer* producer)
 	{
 		if (producer == nullptr)
 			return nlohmann::json::object();
-		return producer->GetStats();
+		nlohmann::json stat;
+		try
+		{
+			stat = producer->GetStats();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetStats]");
+		}
+
+		return stat;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetAppData(Producer* producer)
 	{
 		if (producer == nullptr)
 			return nlohmann::json::object();
-		return producer->GetAppData();
+		nlohmann::json appData;
+		try
+		{
+			appData = producer->GetAppData();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.GetAppData]");
+		}
+
+		return appData;
 	}
 
 	DLL_EXPORT bool IsClosedProducer(Producer* producer)
@@ -327,35 +541,73 @@ extern "C"
 	{
 		if (producer == nullptr)
 			return;
-		producer->Close();
+
+		try
+		{
+			producer->Close();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.Close]");
+		}
 	}
 
 	DLL_EXPORT void PauseProducer(Producer* producer)
 	{
 		if (producer == nullptr)
 			return;
-		producer->Pause();
+		try
+		{
+			producer->Pause();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.Pause]");
+		}
 	}
 
 	DLL_EXPORT void ResumeProducer(Producer* producer)
 	{
 		if (producer == nullptr)
 			return;
-		producer->Resume();
+		try
+		{
+			producer->Resume();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.Resume]");
+		}
 	}
 
 	DLL_EXPORT void ReplaceTrack(Producer* producer, webrtc::MediaStreamTrackInterface* track)
 	{
 		if (producer == nullptr || track == nullptr)
 			return;
-		producer->ReplaceTrack(track);
+		try
+		{
+			producer->ReplaceTrack(track);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.ReplaceTrack]");
+		}
+		
 	}
 
 	DLL_EXPORT void SetMaxSpatialLayer(Producer* producer, uint8_t spatialLayer)
 	{
 		if (producer == nullptr)
 			return;
-		producer->SetMaxSpatialLayer(spatialLayer);
+
+		try
+		{
+			producer->SetMaxSpatialLayer(spatialLayer);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Producer.SetMaxSpatialTrack]");
+		}
 	}
 #pragma endregion
 
@@ -364,49 +616,124 @@ extern "C"
 	{
 		if (consumer == nullptr)
 			return "";
-		return consumer->GetId();
+
+		string id;
+		try
+		{
+			id = consumer->GetId();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetId]");
+		}
+
+		return id;
 	}
 
 	DLL_EXPORT const string& GetProducerIdConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return "";
-		return consumer->GetProducerId();
+
+		string producerId;
+		try
+		{
+			producerId = consumer->GetProducerId();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetProducerId]");
+		}
+
+		return producerId;
 	}
 
 	DLL_EXPORT string GetKindConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return "";
-		return consumer->GetKind();//Return audio or video
+		
+		string kind;
+		try
+		{
+			kind = consumer->GetKind();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetKind]");
+		}
+
+		return kind;//Return audio or video
 	}
 
 	DLL_EXPORT webrtc::MediaStreamTrackInterface* GetTrackConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return nullptr;
-		return consumer->GetTrack();
+		
+		webrtc::MediaStreamTrackInterface* track = nullptr;
+		try
+		{
+			track = consumer->GetTrack();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetTrackConsumer]");
+		}
+
+		return track;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetRtpParametersConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return nlohmann::json::object();
-		return consumer->GetRtpParameters();
+
+		nlohmann::json parameters;
+		try
+		{
+			parameters = consumer->GetRtpParameters();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetRtpParameters]");
+		}
+
+		return parameters;
 	}
 
 	DLL_EXPORT nlohmann::json GetStatsConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return nlohmann::json::object();
-		return consumer->GetStats();
+		nlohmann::json stat;
+		try
+		{
+			stat = consumer->GetStats();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetStats]");
+		}
+
+		return stat;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetAppDataConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return nlohmann::json::object();
-		return consumer->GetAppData();
+		nlohmann::json appData;
+		try
+		{
+			appData = consumer->GetAppData();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.GetAppDataConsumer]");
+		}
+
+		return appData;
 	}
 
 	DLL_EXPORT bool IsClosedConsumer(Consumer* consumer)
@@ -434,14 +761,28 @@ extern "C"
 	{
 		if (consumer == nullptr)
 			return;
-		consumer->Pause();
+		try
+		{
+			consumer->Pause();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Consumer.Pause]");
+		}
 	}
 
 	DLL_EXPORT void ResumeConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return;
-		consumer->Resume();
+		try
+		{
+			consumer->Resume();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e,"[Consumer.Resume]");
+		}
 	}
 #pragma endregion
 	
@@ -589,7 +930,37 @@ extern "C"
 	}
 #pragma endregion
 
-#pragma region Logger
+#pragma region Logging
 
 #pragma endregion
 }
+
+
+#include <fstream>
+#include <ctime>
+#include <iomanip>
+
+#pragma region Util
+// 현재시간을 string type으로 return하는 함수
+const string currentDateTime()
+{
+	auto t = time(nullptr);
+	tm timeManager;
+	localtime_s(&timeManager, &t);
+	ostringstream oss;
+	oss << put_time(&timeManager, "%Y-%m-%d %H-%M");
+
+	return oss.str();
+}
+
+void ErrorLogging(exception e, string prefix = "")
+{
+	string path = "ErrorLog_" + currentDateTime() + ".log";
+	ofstream fileWriter(path.data(), ios_base::app);
+	if (fileWriter.is_open())
+	{
+		fileWriter << "[mediasoupclient_library]" << prefix << e.what() << endl;
+	}
+	fileWriter.close();
+}
+#pragma endregion
