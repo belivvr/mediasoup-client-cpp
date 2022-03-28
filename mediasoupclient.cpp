@@ -791,49 +791,126 @@ extern "C"
 	{
 		if (dataProducer == nullptr)
 			return "";
-		return dataProducer->GetId();
+		string id;
+		try
+		{
+			id = dataProducer->GetId();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetId]");
+		}
+
+		return id;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetSctpStreamParametersDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return nlohmann::json::object();
-		return dataProducer->GetSctpStreamParameters();
+		
+		nlohmann::json result;
+		try
+		{
+			result = dataProducer->GetSctpStreamParameters();
+		}
+		catch(exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetSctpStreamParameters]");
+		}
+
+		return result;
 	}
 
 	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyStateDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return  webrtc::DataChannelInterface::DataState::kClosed;
-		return dataProducer->GetReadyState();
+
+		webrtc::DataChannelInterface::DataState state;
+		try
+		{
+			state = dataProducer->GetReadyState();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetReadyState]");
+		}
+
+		return state;
 	}
 
 	DLL_EXPORT const string& GetLabelDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return  "";
-		return dataProducer->GetLabel();
+
+		string label;
+		try
+		{
+			label = dataProducer->GetLabel();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetLabel]");
+		}
+
+		return label;
 	}
 
 	DLL_EXPORT const string& GetProtocolDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return  "";
-		return dataProducer->GetProtocol();
+
+		string protocol;
+
+		try
+		{
+			protocol = dataProducer->GetProtocol();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetProtocol]");
+		}
+
+		return protocol;
 	}
 
 	DLL_EXPORT const uint8_t GetBufferedAmountDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
-			return  -1;
-		return dataProducer->GetBufferedAmount();
+			return  0;
+		uint8_t amount = 0;
+
+		try
+		{
+			amount = dataProducer->GetBufferedAmount();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetBufferedAmount]");
+		}
+		
+		return amount;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetAppDataDataProducer(DataProducer* dataProducer)
 	{
+		auto result = nlohmann::json::object();
 		if (dataProducer == nullptr)
-			return  nlohmann::json::object();
-		return dataProducer->GetAppData();
+			return  result;
+		
+		try
+		{
+			result = dataProducer->GetAppData();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.GetAppData]");
+		}
+
+		return result;
 	}
 
 	DLL_EXPORT bool IsClosedDataProducer(DataProducer* dataProducer)
@@ -847,65 +924,156 @@ extern "C"
 	{
 		if (dataProducer == nullptr)
 			return;
-		dataProducer->Close();
+		try
+		{
+			dataProducer->Close();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.Close]");
+		}
 	}
 
 	DLL_EXPORT void Send(DataProducer* dataProducer, webrtc::DataBuffer& buffer)
 	{
 		if (dataProducer == nullptr)
 			return;
-		dataProducer->Send(buffer);
+		try
+		{
+			dataProducer->Send(buffer);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.Send]");
+		}
 	}
 #pragma endregion
 
 #pragma region DataConsumer
 	DLL_EXPORT const string& GetIdDataConsumer(DataConsumer* dataConsumer)
 	{
+		string id;
 		if (dataConsumer == nullptr)
-			return "";
-		return dataConsumer->GetId();
+			return id;
+
+		try
+		{
+			id = dataConsumer->GetId();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetId]");
+		}
+
+		return id;
 	}
 
 	DLL_EXPORT const string& GetDataProducerIdDataConsumer(DataConsumer* dataConsumer)
 	{
+		string result;
 		if (dataConsumer == nullptr)
-			return "";
-		return dataConsumer->GetDataProducerId();
+			return result;
+
+		try
+		{
+			result = dataConsumer->GetDataProducerId();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetDataProducerId]");
+		}
+
+		return result;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetSctpStreamParameters(DataConsumer* dataConsumer)
 	{
+		auto parameters = nlohmann::json::object();
 		if (dataConsumer == nullptr)
-			return nlohmann::json::object();
-		return dataConsumer->GetSctpStreamParameters();
+			return parameters;
+
+		try
+		{
+			parameters = dataConsumer->GetSctpStreamParameters();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetSctpStreamParameters]");
+		}
+
+		return parameters;
 	}
 
 	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyState(DataConsumer* dataConsumer)
 	{
+		auto state = webrtc::DataChannelInterface::DataState::kClosed;
 		if (dataConsumer == nullptr)
-			return  webrtc::DataChannelInterface::DataState::kClosed;
-		return dataConsumer->GetReadyState();
+			return  state;
+
+		try
+		{
+			state = dataConsumer->GetReadyState();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetReadyState]");
+		}
+
+		return state;
 	}
 
 	DLL_EXPORT const string& GetLabel(DataConsumer* dataConsumer)
 	{
+		string label;
 		if (dataConsumer == nullptr)
-			return  "";
-		return dataConsumer->GetLabel();
+			return  label;
+
+		try
+		{
+			label = dataConsumer->GetLabel();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetLabel]");
+		}
+		
+		return label;
 	}
 
 	DLL_EXPORT const string& GetProtocol(DataConsumer* dataConsumer)
 	{
+		string protocol;
 		if (dataConsumer == nullptr)
-			return  "";
-		return dataConsumer->GetProtocol();
+			return  protocol;
+		
+		try
+		{
+			protocol = dataConsumer->GetProtocol();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetProtocol]");
+		}
+
+		return protocol;
 	}
 
 	DLL_EXPORT const nlohmann::json& GetAppDataDataConsumer(DataConsumer* dataConsumer)
 	{
+		auto appData = nlohmann::json::object();
 		if (dataConsumer == nullptr)
-			return  nlohmann::json::object();
-		return dataConsumer->GetAppData();
+			return  appData;
+
+		try
+		{
+			appData = dataConsumer->GetAppData();
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.GetAppData]");
+		}
+
+		return appData;
 	}
 
 	DLL_EXPORT bool IsClosedDataConsumer(DataConsumer* dataConsumer)
@@ -919,14 +1087,30 @@ extern "C"
 	{
 		if (dataConsumer == nullptr)
 			return;
-		dataConsumer->Close();
+
+		try
+		{
+			dataConsumer->Close();
+		}
+		catch(exception e)
+		{
+			ErrorLogging(e, "[DataConsumer.Close]");
+		}
 	}
 
 	DLL_EXPORT void SendDataProducer(DataProducer* dataProducer, webrtc::DataBuffer& buffer)
 	{
 		if (dataProducer == nullptr)
 			return;
-		dataProducer->Send(buffer);
+
+		try
+		{
+			dataProducer->Send(buffer);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DataProducer.Send]");
+		}
 	}
 #pragma endregion
 
