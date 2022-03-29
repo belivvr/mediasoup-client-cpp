@@ -44,6 +44,7 @@ extern "C"
 	}
 
 	//C# CallingConvention.stdCall
+	// C++, C# string Marthaling
 	//https://docs.microsoft.com/ko-kr/dotnet/api/system.runtime.interopservices.callingconvention?view=net-6.0
 	DLL_EXPORT void __stdcall Version(char* text, size_t bufferSize)
 	{
@@ -127,13 +128,13 @@ extern "C"
 
 	//TODO wrapping needed Overload exist
 	DLL_EXPORT SendTransport* CreateSendTransport(Device* device, SendTransport::Listener* listener,
-		const std::string& id,
-		const nlohmann::json& iceParameters,
-		const nlohmann::json& iceCandidates,
-		const nlohmann::json& dtlsParameters,
-		const nlohmann::json& sctpParameters,
+		const char* id,
+		const nlohmann::json* iceParameters,
+		const nlohmann::json* iceCandidates,
+		const nlohmann::json* dtlsParameters,
+		const nlohmann::json* sctpParameters,
 		const PeerConnection::Options* peerConnectionOptions = nullptr,
-		const nlohmann::json& appData = nlohmann::json::object())
+		const nlohmann::json* appData = nullptr)
 	{
 		if (device == nullptr || listener == nullptr)
 			return nullptr;
@@ -141,7 +142,13 @@ extern "C"
 		
 		try
 		{
-			transport = device->CreateSendTransport(listener, iceParameters, iceCandidates, dtlsParameters, sctpParameters, peerConnectionOptions, appData);
+			string Id(id);
+			const nlohmann::json iceParameter = *iceParameters;
+			const nlohmann::json iceCandidate = *iceCandidates;
+			const nlohmann::json dtlsParameter = *dtlsParameters;
+			const nlohmann::json sctpParameter = *sctpParameters;
+			const nlohmann::json data = appData == nullptr ? nlohmann::json::object() : *appData;
+			transport = device->CreateSendTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, sctpParameter, peerConnectionOptions, data);
 		}
 		catch (exception e)
 		{
@@ -155,13 +162,13 @@ extern "C"
 	DLL_EXPORT RecvTransport* CreateRecvTransport(
 		Device* device,
 		RecvTransport::Listener* listener,
-		const std::string& id,
-		const nlohmann::json& iceParameters,
-		const nlohmann::json& iceCandidates,
-		const nlohmann::json& dtlsParameters,
-		const nlohmann::json& sctpParameters,
+		const char* id,
+		const nlohmann::json* iceParameters,
+		const nlohmann::json* iceCandidates,
+		const nlohmann::json* dtlsParameters,
+		const nlohmann::json* sctpParameters,
 		const PeerConnection::Options* peerConnectionOptions = nullptr,
-		const nlohmann::json& appData = nlohmann::json::object())
+		const nlohmann::json* appData = nullptr)
 	{
 		if (device == nullptr || listener == nullptr)
 			return nullptr;
@@ -169,7 +176,13 @@ extern "C"
 		RecvTransport* transport = nullptr;
 		try
 		{
-			transport = device->CreateRecvTransport(listener, id, iceParameters, iceCandidates, dtlsParameters, sctpParameters, peerConnectionOptions, appData);
+			string Id(id);
+			const nlohmann::json iceParameter = *iceParameters;
+			const nlohmann::json iceCandidate = *iceCandidates;
+			const nlohmann::json dtlsParameter = *dtlsParameters;
+			const nlohmann::json sctpParameter = *sctpParameters;
+			const nlohmann::json data = appData == nullptr ? nlohmann::json::object() : *appData;
+			transport = device->CreateRecvTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, sctpParameter, peerConnectionOptions, data);
 		}
 		catch (exception e)
 		{
@@ -184,7 +197,7 @@ extern "C"
 #pragma region Transport
 	//Transport
 	//TODO change string to char for C# stringbuilder
-	DLL_EXPORT const string GetId(Transport* transport)
+	DLL_EXPORT const char* GetId(Transport* transport)
 	{
 		if (transport == nullptr)
 			return "transport is null";
@@ -198,10 +211,12 @@ extern "C"
 			ErrorLogging(e, "[Transport.GetId]");
 			return "[Transport]GetId Error";
 		}
-		return id;
+		const char* idPtr = id.c_str();
+
+		return idPtr;
 	}
 
-	DLL_EXPORT const string GetConnectionState(Transport* transport)
+	DLL_EXPORT const char* GetConnectionState(Transport* transport)
 	{
 		if (transport == nullptr)
 			return "transport is null";
@@ -217,7 +232,9 @@ extern "C"
 			state = "Error Occurred";
 		}
 
-		return state;
+		const char* stateContainer = state.c_str();
+		
+		return stateContainer;
 	}
 
 	DLL_EXPORT bool IsClosed(Transport* transport)
@@ -229,13 +246,13 @@ extern "C"
 	}
 
 
-	DLL_EXPORT const nlohmann::json GetStats(Transport* transport)
+	DLL_EXPORT const nlohmann::json* GetStats(Transport* transport)
 	{
-		if (transport == nullptr)
-			return true;
-
-
 		nlohmann::json stat;
+		
+		if (transport == nullptr)
+			return nullptr;
+		
 		try
 		{
 			stat = transport->GetStats();
@@ -246,7 +263,7 @@ extern "C"
 			stat = nlohmann::json::object();
 		}
 
-		return stat;
+		return &stat;
 	}
 
 	//API comment : This method should be called when the server side transport has been closed (and vice-versa)
@@ -265,14 +282,14 @@ extern "C"
 		}
 	}
 
-	DLL_EXPORT void RestartIce(Transport* transport, const nlohmann::json& iceParameters)
+	DLL_EXPORT void RestartIce(Transport* transport, const nlohmann::json* iceParameters)
 	{
 		if (transport == nullptr)
 			return;
 
 		try
 		{
-			transport->RestartIce(iceParameters);
+			transport->RestartIce(*iceParameters);
 		}
 		catch (exception e)
 		{
@@ -281,13 +298,13 @@ extern "C"
 		
 	}
 
-	DLL_EXPORT void UpdateIceServers(Transport* transport, const nlohmann::json& iceServers = nlohmann::json())
+	DLL_EXPORT void UpdateIceServers(Transport* transport, const nlohmann::json* iceServers)
 	{
 		if (transport == nullptr)
 			return;
 		try
 		{
-			transport->UpdateIceServers(iceServers);
+			transport->UpdateIceServers(*iceServers);
 		}
 		catch (exception e)
 		{
@@ -307,28 +324,35 @@ extern "C"
 		const std::vector<webrtc::RtpEncodingParameters>* encodings,
 		const nlohmann::json* codecOptions,
 		const nlohmann::json* codec,
-		const nlohmann::json& appData = nlohmann::json::object())
+		const nlohmann::json* appData = nullptr)
 	{
 		if (sendTransport == nullptr || producerListener == nullptr)
 			return nullptr;
 
-		return sendTransport->Produce(producerListener, track, encodings, codecOptions, codec, appData);
+		
+		if(appData == nullptr)
+			sendTransport->Produce(producerListener, track, encodings, codecOptions, codec);
+		else
+			return sendTransport->Produce(producerListener, track, encodings, codecOptions, codec, *appData);
 	}
 
 	DLL_EXPORT DataProducer* ProduceData(
 		SendTransport* sendTransport,
 		DataProducer::Listener* listener,
-		const std::string& label = "",
-		const std::string& protocol = "",
+		const char* label = "",
+		const char* protocol = "",
 		bool ordered = true,
 		int maxRetransmits = 0,
 		int maxPacketLifeTime = 0,
-		const nlohmann::json& appData = nlohmann::json::object())
+		const nlohmann::json* appData = nullptr)
 	{
 		DataProducer* dataProducer = nullptr;
 		try
 		{
-			dataProducer = sendTransport->ProduceData(listener, label, protocol, ordered, maxRetransmits, maxPacketLifeTime, appData);
+			if(appData == nullptr)
+				dataProducer = sendTransport->ProduceData(listener, label, protocol, ordered, maxRetransmits, maxPacketLifeTime);
+			else
+				dataProducer = sendTransport->ProduceData(listener, label, protocol, ordered, maxRetransmits, maxPacketLifeTime, *appData);
 		}
 		catch (exception e)
 		{
@@ -346,18 +370,21 @@ extern "C"
 	DLL_EXPORT Consumer* Consume(
 		RecvTransport* recvTransport,
 		Consumer::Listener* consumerListener,
-		const std::string& id,
-		const std::string& producerId,
-		const std::string& kind,
+		const char* id,
+		const char* producerId,
+		const char* kind,
 		nlohmann::json* rtpParameters,
-		const nlohmann::json& appData = nlohmann::json::object())
+		const nlohmann::json* appData = nullptr)
 	{
 		if (recvTransport == nullptr || consumerListener == nullptr)
 			return nullptr;
 		Consumer* consumer = nullptr;
 		try
 		{
-			consumer = recvTransport->Consume(consumerListener, id, producerId, kind, rtpParameters, appData);
+			if(appData == nullptr)
+				consumer = recvTransport->Consume(consumerListener, id, producerId, kind, rtpParameters);
+			else
+				consumer = recvTransport->Consume(consumerListener, id, producerId, kind, rtpParameters, *appData);
 		}
 		catch (exception e)
 		{
@@ -372,20 +399,22 @@ extern "C"
 	DLL_EXPORT DataConsumer* ConsumeData(
 		RecvTransport* recvTransport,
 		DataConsumer::Listener* listener,
-		const std::string& id,
-		const std::string& producerId,
+		const char* id,
+		const char* producerId,
 		const uint16_t streamId,
-		const std::string& label,
-		const std::string& protocol = std::string(),
-		const nlohmann::json& appData = nlohmann::json::object()
-		)
+		const char* label,
+		const char* protocol = "",
+		const nlohmann::json* appData = nullptr)
 	{
 		if (recvTransport == nullptr || listener == nullptr)
 			return nullptr;
 		DataConsumer* dataConsumer = nullptr;
 		try
 		{
-			dataConsumer = recvTransport->ConsumeData(listener, id, producerId, streamId, label, protocol, appData);
+			if(appData == nullptr)
+				dataConsumer = recvTransport->ConsumeData(listener, id, producerId, streamId, label, protocol);
+			else
+				dataConsumer = recvTransport->ConsumeData(listener, id, producerId, streamId, label, protocol, *appData);
 		}
 		catch (exception e)
 		{
@@ -398,7 +427,7 @@ extern "C"
 #pragma endregion
 
 #pragma region Producer
-	DLL_EXPORT const string& GetIdProducer(Producer* producer)
+	DLL_EXPORT const char* GetIdProducer(Producer* producer)
 	{
 		if (producer == nullptr)
 			return "";
@@ -412,11 +441,12 @@ extern "C"
 			ErrorLogging(e, "[Producer.GetId]");
 			id = "Error GetId";
 		}
-
-		return id;
+		const char* idPtr = id.c_str();
+		
+		return idPtr;
 	}
 	
-	DLL_EXPORT string GetKind(Producer* producer)
+	DLL_EXPORT const char* GetKind(Producer* producer)
 	{
 		if (producer == nullptr)
 			return "";
@@ -432,7 +462,9 @@ extern "C"
 			kind = "Error Occurred";
 		}
 		
-		return kind;//Return audio or video
+		const char* kindPtr = kind.c_str();
+
+		return kindPtr;//Return audio or video
 	}
 
 	DLL_EXPORT webrtc::MediaStreamTrackInterface* GetTrack(Producer* producer)
@@ -453,10 +485,10 @@ extern "C"
 		return trackInterface;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetRtpParameters(Producer* producer)
+	DLL_EXPORT const nlohmann::json* GetRtpParameters(Producer* producer)
 	{
 		if (producer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 
 		nlohmann::json parameters;
 		try
@@ -468,7 +500,7 @@ extern "C"
 			ErrorLogging(e, "[Producer.GetRtpParameters]");
 		}
 
-		return parameters;
+		return &parameters;
 	}
 
 	DLL_EXPORT const uint8_t GetMaxSpatialLayer(Producer* producer)
@@ -489,10 +521,10 @@ extern "C"
 		return layer;
 	}
 
-	DLL_EXPORT nlohmann::json GetStatsProducer(Producer* producer)
+	DLL_EXPORT nlohmann::json* GetStatsProducer(Producer* producer)
 	{
 		if (producer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 		nlohmann::json stat;
 		try
 		{
@@ -503,13 +535,13 @@ extern "C"
 			ErrorLogging(e, "[Producer.GetStats]");
 		}
 
-		return stat;
+		return &stat;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetAppData(Producer* producer)
+	DLL_EXPORT const nlohmann::json* GetAppData(Producer* producer)
 	{
 		if (producer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 		nlohmann::json appData;
 		try
 		{
@@ -520,7 +552,7 @@ extern "C"
 			ErrorLogging(e, "[Producer.GetAppData]");
 		}
 
-		return appData;
+		return &appData;
 	}
 
 	DLL_EXPORT bool IsClosedProducer(Producer* producer)
@@ -612,7 +644,7 @@ extern "C"
 #pragma endregion
 
 #pragma region Consumer
-	DLL_EXPORT const string& GetIdConsumer(Consumer* consumer)
+	DLL_EXPORT const char* GetIdConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return "";
@@ -626,11 +658,12 @@ extern "C"
 		{
 			ErrorLogging(e, "[Consumer.GetId]");
 		}
-
-		return id;
+		const char* idPtr = id.c_str();
+		
+		return idPtr;
 	}
 
-	DLL_EXPORT const string& GetProducerIdConsumer(Consumer* consumer)
+	DLL_EXPORT const char* GetProducerIdConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return "";
@@ -645,10 +678,12 @@ extern "C"
 			ErrorLogging(e, "[Consumer.GetProducerId]");
 		}
 
-		return producerId;
+		auto* producerIdPtr = producerId.c_str();
+		
+		return producerIdPtr;
 	}
 
-	DLL_EXPORT string GetKindConsumer(Consumer* consumer)
+	DLL_EXPORT const char* GetKindConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
 			return "";
@@ -663,7 +698,8 @@ extern "C"
 			ErrorLogging(e, "[Consumer.GetKind]");
 		}
 
-		return kind;//Return audio or video
+		const char* kindPtr = kind.c_str();
+		return kindPtr;//Return audio or video
 	}
 
 	DLL_EXPORT webrtc::MediaStreamTrackInterface* GetTrackConsumer(Consumer* consumer)
@@ -684,10 +720,10 @@ extern "C"
 		return track;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetRtpParametersConsumer(Consumer* consumer)
+	DLL_EXPORT const nlohmann::json* GetRtpParametersConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 
 		nlohmann::json parameters;
 		try
@@ -699,13 +735,13 @@ extern "C"
 			ErrorLogging(e, "[Consumer.GetRtpParameters]");
 		}
 
-		return parameters;
+		return &parameters;
 	}
 
-	DLL_EXPORT nlohmann::json GetStatsConsumer(Consumer* consumer)
+	DLL_EXPORT nlohmann::json* GetStatsConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 		nlohmann::json stat;
 		try
 		{
@@ -716,13 +752,13 @@ extern "C"
 			ErrorLogging(e, "[Consumer.GetStats]");
 		}
 
-		return stat;
+		return &stat;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetAppDataConsumer(Consumer* consumer)
+	DLL_EXPORT const nlohmann::json* GetAppDataConsumer(Consumer* consumer)
 	{
 		if (consumer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 		nlohmann::json appData;
 		try
 		{
@@ -733,7 +769,7 @@ extern "C"
 			ErrorLogging(e, "[Consumer.GetAppDataConsumer]");
 		}
 
-		return appData;
+		return &appData;
 	}
 
 	DLL_EXPORT bool IsClosedConsumer(Consumer* consumer)
@@ -787,7 +823,7 @@ extern "C"
 #pragma endregion
 	
 #pragma region DataProducer
-	DLL_EXPORT const string& GetIdDataProducer(DataProducer* dataProducer)
+	DLL_EXPORT const char* GetIdDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return "";
@@ -800,14 +836,14 @@ extern "C"
 		{
 			ErrorLogging(e, "[DataProducer.GetId]");
 		}
-
-		return id;
+		auto* idPtr = id.c_str();
+		return idPtr;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetSctpStreamParametersDataProducer(DataProducer* dataProducer)
+	DLL_EXPORT const nlohmann::json* GetSctpStreamParametersDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
-			return nlohmann::json::object();
+			return nullptr;
 		
 		nlohmann::json result;
 		try
@@ -819,7 +855,7 @@ extern "C"
 			ErrorLogging(e, "[DataProducer.GetSctpStreamParameters]");
 		}
 
-		return result;
+		return &result;
 	}
 
 	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyStateDataProducer(DataProducer* dataProducer)
@@ -840,7 +876,7 @@ extern "C"
 		return state;
 	}
 
-	DLL_EXPORT const string& GetLabelDataProducer(DataProducer* dataProducer)
+	DLL_EXPORT const char* GetLabelDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return  "";
@@ -854,11 +890,11 @@ extern "C"
 		{
 			ErrorLogging(e, "[DataProducer.GetLabel]");
 		}
-
-		return label;
+		auto* labelPtr = label.c_str();
+		return labelPtr;
 	}
 
-	DLL_EXPORT const string& GetProtocolDataProducer(DataProducer* dataProducer)
+	DLL_EXPORT const char* GetProtocolDataProducer(DataProducer* dataProducer)
 	{
 		if (dataProducer == nullptr)
 			return  "";
@@ -874,7 +910,8 @@ extern "C"
 			ErrorLogging(e, "[DataProducer.GetProtocol]");
 		}
 
-		return protocol;
+		auto* protocolPtr = protocol.c_str();
+		return protocolPtr;
 	}
 
 	DLL_EXPORT const uint8_t GetBufferedAmountDataProducer(DataProducer* dataProducer)
@@ -895,11 +932,11 @@ extern "C"
 		return amount;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetAppDataDataProducer(DataProducer* dataProducer)
+	DLL_EXPORT const nlohmann::json* GetAppDataDataProducer(DataProducer* dataProducer)
 	{
 		auto result = nlohmann::json::object();
 		if (dataProducer == nullptr)
-			return  result;
+			return  &result;
 		
 		try
 		{
@@ -910,7 +947,7 @@ extern "C"
 			ErrorLogging(e, "[DataProducer.GetAppData]");
 		}
 
-		return result;
+		return &result;
 	}
 
 	DLL_EXPORT bool IsClosedDataProducer(DataProducer* dataProducer)
@@ -934,13 +971,13 @@ extern "C"
 		}
 	}
 
-	DLL_EXPORT void Send(DataProducer* dataProducer, webrtc::DataBuffer& buffer)
+	DLL_EXPORT void Send(DataProducer* dataProducer, webrtc::DataBuffer* buffer)
 	{
 		if (dataProducer == nullptr)
 			return;
 		try
 		{
-			dataProducer->Send(buffer);
+			dataProducer->Send(*buffer);
 		}
 		catch (exception e)
 		{
@@ -950,11 +987,11 @@ extern "C"
 #pragma endregion
 
 #pragma region DataConsumer
-	DLL_EXPORT const string& GetIdDataConsumer(DataConsumer* dataConsumer)
+	DLL_EXPORT const char* GetIdDataConsumer(DataConsumer* dataConsumer)
 	{
 		string id;
 		if (dataConsumer == nullptr)
-			return id;
+			return "";
 
 		try
 		{
@@ -965,14 +1002,15 @@ extern "C"
 			ErrorLogging(e, "[DataConsumer.GetId]");
 		}
 
-		return id;
+		auto* idPtr = id.c_str();
+		return idPtr;
 	}
 
-	DLL_EXPORT const string& GetDataProducerIdDataConsumer(DataConsumer* dataConsumer)
+	DLL_EXPORT const char* GetDataProducerIdDataConsumer(DataConsumer* dataConsumer)
 	{
 		string result;
 		if (dataConsumer == nullptr)
-			return result;
+			return "";
 
 		try
 		{
@@ -983,14 +1021,15 @@ extern "C"
 			ErrorLogging(e, "[DataConsumer.GetDataProducerId]");
 		}
 
-		return result;
+		auto* resultPtr = result.c_str();
+		return resultPtr;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetSctpStreamParameters(DataConsumer* dataConsumer)
+	DLL_EXPORT const nlohmann::json* GetSctpStreamParameters(DataConsumer* dataConsumer)
 	{
 		auto parameters = nlohmann::json::object();
 		if (dataConsumer == nullptr)
-			return parameters;
+			return &parameters;
 
 		try
 		{
@@ -1001,10 +1040,10 @@ extern "C"
 			ErrorLogging(e, "[DataConsumer.GetSctpStreamParameters]");
 		}
 
-		return parameters;
+		return &parameters;
 	}
 
-	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyState(DataConsumer* dataConsumer)
+	DLL_EXPORT webrtc::DataChannelInterface::DataState GetReadyStateDataConsumer(DataConsumer* dataConsumer)
 	{
 		auto state = webrtc::DataChannelInterface::DataState::kClosed;
 		if (dataConsumer == nullptr)
@@ -1022,11 +1061,11 @@ extern "C"
 		return state;
 	}
 
-	DLL_EXPORT const string& GetLabel(DataConsumer* dataConsumer)
+	DLL_EXPORT const char* GetLabel(DataConsumer* dataConsumer)
 	{
 		string label;
 		if (dataConsumer == nullptr)
-			return  label;
+			return "";
 
 		try
 		{
@@ -1037,14 +1076,15 @@ extern "C"
 			ErrorLogging(e, "[DataConsumer.GetLabel]");
 		}
 		
-		return label;
+		auto* labelPtr = label.c_str();
+		return labelPtr;
 	}
 
-	DLL_EXPORT const string& GetProtocol(DataConsumer* dataConsumer)
+	DLL_EXPORT const char* GetProtocol(DataConsumer* dataConsumer)
 	{
 		string protocol;
 		if (dataConsumer == nullptr)
-			return  protocol;
+			return  "";
 		
 		try
 		{
@@ -1055,14 +1095,15 @@ extern "C"
 			ErrorLogging(e, "[DataConsumer.GetProtocol]");
 		}
 
-		return protocol;
+		auto* protocolPtr = protocol.c_str();
+		return protocolPtr;
 	}
 
-	DLL_EXPORT const nlohmann::json& GetAppDataDataConsumer(DataConsumer* dataConsumer)
+	DLL_EXPORT const nlohmann::json* GetAppDataDataConsumer(DataConsumer* dataConsumer)
 	{
 		auto appData = nlohmann::json::object();
 		if (dataConsumer == nullptr)
-			return  appData;
+			return  &appData;
 
 		try
 		{
@@ -1073,7 +1114,7 @@ extern "C"
 			ErrorLogging(e, "[DataConsumer.GetAppData]");
 		}
 
-		return appData;
+		return &appData;
 	}
 
 	DLL_EXPORT bool IsClosedDataConsumer(DataConsumer* dataConsumer)
@@ -1098,14 +1139,14 @@ extern "C"
 		}
 	}
 
-	DLL_EXPORT void SendDataProducer(DataProducer* dataProducer, webrtc::DataBuffer& buffer)
+	DLL_EXPORT void SendDataProducer(DataProducer* dataProducer, webrtc::DataBuffer* buffer)
 	{
 		if (dataProducer == nullptr)
 			return;
 
 		try
 		{
-			dataProducer->Send(buffer);
+			dataProducer->Send(*buffer);
 		}
 		catch (exception e)
 		{
@@ -1114,17 +1155,109 @@ extern "C"
 	}
 #pragma endregion
 
-#pragma region Logging
+#pragma region Json Util
+	DLL_EXPORT void GetJsonString(const nlohmann::json* jsonObject, char* text, size_t bufferSize)
+	{
+		if (jsonObject == nullptr)
+			return;
 
+		string jsonContainer;
+		try
+		{
+			jsonContainer = jsonObject->dump();
+			strcpy_s(text, bufferSize, jsonContainer.c_str());
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Json Util, GetJsonString]");
+		}
+	}
+	
+	DLL_EXPORT const char* TestId()
+	{
+		string* testId = new string("testDongho5309");
+		return testId->c_str();
+	}
+
+	DLL_EXPORT uint8_t TestUint8(int testCase)
+	{
+		switch (testCase)
+		{
+		case -1:
+		default:
+			return testCase;
+		}
+	}
+
+	DLL_EXPORT int TestEnumInput(webrtc::DataChannelInterface::DataState state)
+	{
+		try
+		{
+			switch (state)
+			{
+			case webrtc::DataChannelInterface::DataState::kConnecting:
+				return 0;
+			case webrtc::DataChannelInterface::DataState::kOpen:
+				return 1;
+			case webrtc::DataChannelInterface::DataState::kClosing:
+				return 2;
+			case webrtc::DataChannelInterface::DataState::kClosed:
+				return 3;
+			default:
+				return -1;
+			}
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[TestEnumInput]");
+		}
+	}
+
+	DLL_EXPORT void __stdcall TestGetJsonString(char* text, size_t bufferSize)
+	{
+		const std::string strJson = R"(
+    {
+      "id" : 123456,
+      "res" : 111.222,
+      "name" : "Example Json",
+      "desc" : "Hello, SnowDeer",
+      "data" : [
+        {
+          "id" : 101,
+          "name" : "snowdeer"
+        },
+        {
+          "id" : 202,
+          "name" : "ice-rabbit"
+        }
+      ],
+      "info" : {
+        "notebook" : "macbook m1 pro",
+        "address" : "Seoul"
+      }
+    }
+  )";
+
+		auto jObj = nlohmann::json::parse(strJson);
+		string jsonContainer;
+		try
+		{
+			jsonContainer = jObj.dump();
+			strcpy_s(text, bufferSize, jsonContainer.c_str());
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Json Util, GetJsonString]");
+		}
+	}
 #pragma endregion
 }
 
-
+#pragma region Util
 #include <fstream>
 #include <ctime>
 #include <iomanip>
 
-#pragma region Util
 // 현재시간을 string type으로 return하는 함수
 const string currentDateTime()
 {
@@ -1137,13 +1270,13 @@ const string currentDateTime()
 	return oss.str();
 }
 
-void ErrorLogging(exception e, string prefix = "")
+void ErrorLogging(exception e, string prefix)
 {
 	string path = "ErrorLog_" + currentDateTime() + ".log";
 	ofstream fileWriter(path.data(), ios_base::app);
 	if (fileWriter.is_open())
 	{
-		fileWriter << "[mediasoupclient_library]" << prefix << e.what() << endl;
+		fileWriter << prefix << e.what() << endl;
 	}
 	fileWriter.close();
 }
