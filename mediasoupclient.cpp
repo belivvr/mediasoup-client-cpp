@@ -144,7 +144,7 @@ extern "C"
 		try
 		{
 			string typeText(type, typeLength);
-			canProduce = device->CanProduce(type);
+			canProduce = device->CanProduce(typeText);
 		}
 		catch (exception e)
 		{
@@ -1295,15 +1295,13 @@ const string currentDateTime()
 
 const string currentLogTime()
 {
-	time_t     now = time(0);
-	struct tm  tstruct;
-	char       buf[80];
-	tstruct = *localtime(&now);
-	// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-	// for more information about date/time format
-	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+	auto t = time(nullptr);
+	tm timeManager;
+	localtime_s(&timeManager, &t);
+	ostringstream oss;
+	oss << put_time(&timeManager, "%Y-%m-%d.%X");
 
-	return buf;
+	return oss.str();
 }
 
 void ErrorLogging(exception e, string prefix)
