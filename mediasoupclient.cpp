@@ -104,7 +104,7 @@ extern "C"
 		return device->IsLoaded();
 	}
 
-	DLL_EXPORT void DeviceLoad(Device* device, const nlohmann::json* rtpCapabilities, const PeerConnection::Options* peerConnectionOptions = nullptr)
+	DLL_EXPORT void Load(Device* device, const nlohmann::json* rtpCapabilities, const PeerConnection::Options* peerConnectionOptions = nullptr)
 	{
 		if (device == nullptr || rtpCapabilities == nullptr)
 			return;
@@ -118,11 +118,40 @@ extern "C"
 		}
 	}
 
-	DLL_EXPORT bool CanProduce(Device* device, const char* type)
+	DLL_EXPORT void LoadByGetRtp(Device* device, char* rtpCapabilities, int rtpLength, const PeerConnection::Options* peerConnectionOptions = nullptr)
+	{
+		if (device == nullptr || rtpCapabilities == nullptr)
+			return;
+		try
+		{
+			string rtpDetail(rtpCapabilities, rtpLength);
+			auto rtp = nlohmann::json::parse(rtpDetail);
+			device->Load(rtp, peerConnectionOptions);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.Load]");
+		}
+	}
+
+	DLL_EXPORT bool CanProduce(Device* device, char* type, int typeLength)
 	{
 		if (device == nullptr)
 			return false;
-		return device->CanProduce(type);
+
+		bool canProduce = false;
+		
+		try
+		{
+			string typeText(type, typeLength);
+			canProduce = device->CanProduce(type);
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.CanProduce]");
+		}
+
+		return canProduce;
 	}
 
 
@@ -245,7 +274,6 @@ extern "C"
 		return transport->IsClosed();
 	}
 
-
 	DLL_EXPORT const nlohmann::json* GetStats(Transport* transport)
 	{
 		nlohmann::json stat;
@@ -311,9 +339,6 @@ extern "C"
 			ErrorLogging(e, "[Transport.UpdateIceServers]");
 		}
 	}
-
-	//Transport Event
-	//고민 좀 더 해봐야할듯 cpp event는 어떤 식으로 래핑해야할지
 #pragma endregion
 
 #pragma region SendTransport
@@ -362,8 +387,6 @@ extern "C"
 
 		return dataProducer;
 	}
-
-	//SendTransport Listener
 #pragma endregion
 
 #pragma region RectTransport
@@ -1270,13 +1293,26 @@ const string currentDateTime()
 	return oss.str();
 }
 
+const string currentLogTime()
+{
+	time_t     now = time(0);
+	struct tm  tstruct;
+	char       buf[80];
+	tstruct = *localtime(&now);
+	// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+	// for more information about date/time format
+	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+	return buf;
+}
+
 void ErrorLogging(exception e, string prefix)
 {
 	string path = "ErrorLog_" + currentDateTime() + ".log";
 	ofstream fileWriter(path.data(), ios_base::app);
 	if (fileWriter.is_open())
 	{
-		fileWriter << prefix << e.what() << endl;
+		fileWriter <<"["  << currentLogTime() << "]" << prefix << e.what() << endl;
 	}
 	fileWriter.close();
 }
