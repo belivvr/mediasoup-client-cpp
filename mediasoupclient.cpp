@@ -27,6 +27,7 @@ extern "C"
 	{
 		try
 		{
+			Debug::Log("mediasoupclient Initialize");
 			mediasoupclient::Initialize();
 		}
 		catch (exception e)
@@ -37,6 +38,7 @@ extern "C"
 
 	DLL_EXPORT void CleanUp()
 	{
+		Debug::Log("mediasoupclient clean up");
 		mediasoupclient::Cleanup();
 	}
 
@@ -54,6 +56,7 @@ extern "C"
 #pragma region Device
 	DLL_EXPORT mediasoupclient::Device* MakeDevice()
 	{
+		Debug::Log("Alloc Device ptr");
 		return new mediasoupclient::Device();
 	}
 
