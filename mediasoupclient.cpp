@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "mediasoupclient.hpp"
+#include "DebugCpp.h"
 using namespace std;
 
 #define DLL_EXPORT_FLAG
@@ -16,12 +17,8 @@ using namespace std;
 using namespace mediasoupclient;
 
 const string currentDateTime();
+const string currentLogTime();
 void ErrorLogging(exception e, string prefix="");
-
-///<summary>
-/// check out below may help you understand
-/// https://mediasoup.org/documentation/v3/libmediasoupclient/api
-///</summary
 
 extern "C"
 {
@@ -95,6 +92,43 @@ extern "C"
 		}
 
 		return rtp;
+	}
+
+	DLL_EXPORT void GetSctpCapabilitiesByString(mediasoupclient::Device* device, char* stringContainer, int stringLength)
+	{
+		if (device == nullptr)
+			return;
+		nlohmann::json result;
+		try
+		{
+			result = device->GetSctpCapabilities();
+			string resultData = result.dump();
+
+			strcpy_s(stringContainer, stringLength, resultData.c_str());
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.GetSctpCapabilities]");
+		}
+
+	}
+			   														   
+	DLL_EXPORT void GetRtpCapabilitiesByString(mediasoupclient::Device* device , char* stringContainer, int stringLength)
+	{
+		if (device == nullptr)
+			return;
+		nlohmann::json rtp;
+		try
+		{
+			rtp = device->GetRtpCapabilities();
+			string rtpData = rtp.dump();
+
+			strcpy_s(stringContainer, stringLength, rtpData.c_str());
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[Device.GetRtpCapabilities]");
+		}
 	}
 
 	DLL_EXPORT bool IsLoaded(Device* device)
@@ -1314,4 +1348,6 @@ void ErrorLogging(exception e, string prefix)
 	}
 	fileWriter.close();
 }
+
+
 #pragma endregion
