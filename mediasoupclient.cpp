@@ -4,6 +4,7 @@
 
 #include "mediasoupclient.hpp"
 #include "DebugCpp.h"
+#include "Broadcaster.hpp"
 using namespace std;
 
 #define DLL_EXPORT_FLAG
@@ -58,6 +59,20 @@ extern "C"
 	{
 		Debug::Log("Alloc Device ptr");
 		return new mediasoupclient::Device();
+	}
+
+	DLL_EXPORT void DeleteDevice(Device* device)
+	{
+		Debug::Log("Delete Device ptr");
+		try
+		{
+			if (device != nullptr)
+				delete device;
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DeleteDevice]");
+		}
 	}
 
 	DLL_EXPORT const nlohmann::json* GetSctpCapabilities(mediasoupclient::Device* device)
@@ -193,8 +208,11 @@ extern "C"
 
 
 	//TODO wrapping needed Overload exist
-	DLL_EXPORT SendTransport* CreateSendTransport(Device* device, SendTransport::Listener* listener,
-		const char* id,
+	DLL_EXPORT SendTransport* CreateSendTransport(
+		Device* device,
+		SendTransport::Listener* listener,
+		char* id,
+		int length,
 		const nlohmann::json* iceParameters,
 		const nlohmann::json* iceCandidates,
 		const nlohmann::json* dtlsParameters,
@@ -208,12 +226,18 @@ extern "C"
 		
 		try
 		{
-			string Id(id);
+			string Id(id, length);
+			Debug::Log("[CreateSendTransport]Id : " + Id);
 			const nlohmann::json iceParameter = *iceParameters;
+			Debug::Log("[CreateSendTransport]iceParams : " + iceParameter.dump());
 			const nlohmann::json iceCandidate = *iceCandidates;
+			Debug::Log("[CreateSendTransport]iceCandidate : " + iceCandidate.dump());
 			const nlohmann::json dtlsParameter = *dtlsParameters;
+			Debug::Log("[CreateSendTransport]dtlsParameter : " + dtlsParameter.dump());
 			const nlohmann::json sctpParameter = *sctpParameters;
+			Debug::Log("[CreateSendTransport]sctpParams : " + sctpParameter.dump());
 			const nlohmann::json data = appData == nullptr ? nlohmann::json::object() : *appData;
+			Debug::Log("[CreateSendTransport]appData : " + data.dump());
 			transport = device->CreateSendTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, sctpParameter, peerConnectionOptions, data);
 		}
 		catch (exception e)
@@ -1216,16 +1240,15 @@ extern "C"
 #pragma endregion
 
 #pragma region Json Util
-	DLL_EXPORT void GetJsonString(const nlohmann::json* jsonObject, char* text, size_t bufferSize)
+	DLL_EXPORT void __cdecl GetJsonString(const nlohmann::json* jsonObject, char* text, int textSize)
 	{
 		if (jsonObject == nullptr)
 			return;
 
-		string jsonContainer;
 		try
 		{
-			jsonContainer = jsonObject->dump();
-			strcpy_s(text, bufferSize, jsonContainer.c_str());
+			string getData = jsonObject->dump();
+			strcpy_s(text, getData.length() + 1, getData.c_str());
 		}
 		catch (exception e)
 		{
@@ -1233,6 +1256,38 @@ extern "C"
 		}
 	}
 	
+	DLL_EXPORT nlohmann::json* MakeJsonObject(char* data, size_t dataSize)
+	{
+		nlohmann::json* jsonDynamic = nullptr;
+		try
+		{
+			string dataString(data, dataSize);
+			Debug::Log("[MakeJsonObject Json]" + dataString, Color::Green);
+			jsonDynamic = new nlohmann::json(dataString);
+			Debug::Log("[MakeJsonObject Get]" + jsonDynamic->dump());
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[MakeJsonObject]");
+		}
+
+		return jsonDynamic;
+	}
+
+	DLL_EXPORT void DeleteJsonObject(nlohmann::json* data)
+	{
+		try
+		{
+			Debug::Log("Delete Json Object");
+			if (data != nullptr)
+				delete data;
+		}
+		catch (exception e)
+		{
+			ErrorLogging(e, "[DeleteJsonObject]");
+		}
+	}
+
 	DLL_EXPORT const char* TestId()
 	{
 		string* testId = new string("testDongho5309");
@@ -1310,6 +1365,28 @@ extern "C"
 			ErrorLogging(e, "[Json Util, GetJsonString]");
 		}
 	}
+#pragma endregion
+
+#pragma region Broadcaster
+	DLL_EXPORT Broadcaster* MakeBroadcaster()
+	{
+		Debug::Log("Make Broadcaster");
+		return new Broadcaster();
+	}
+
+	DLL_EXPORT void DeleteBroadcaster(Broadcaster* broadcaster)
+	{
+		if (broadcaster != nullptr)
+		{
+			delete broadcaster;
+		}
+	}
+	
+	DLL_EXPORT void SaveSendTransport(Broadcaster* broadcaster, SendTransport* sendTransport)
+	{
+		broadcaster->sendTransport = sendTransport;
+	}
+
 #pragma endregion
 }
 
