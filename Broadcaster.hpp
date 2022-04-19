@@ -1,8 +1,11 @@
 #ifndef BROADCASTER_H
 #define BROADCASTER_H
-
+#define WEBRTC_WIN
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include "mediasoupclient.hpp"
 #include "json.hpp"
+#include "DebugCpp.h"
 #include <chrono>
 #include <condition_variable>
 #include <future>
@@ -67,18 +70,23 @@ public:
 	void OnMessage(mediasoupclient::DataConsumer* dataConsumer, const webrtc::DataBuffer& buffer) override; // just log On Message
 	void OnConnecting(mediasoupclient::DataConsumer* dataConsumer) override
 	{
+		Debug::Log("[Broadcaster]OnConnecting");
 	}
 	void OnClosing(mediasoupclient::DataConsumer* dataConsumer) override								
 	{
+		Debug::Log("[Broadcaster]OnClosing");
 	}
 	void OnClose(mediasoupclient::DataConsumer* dataConsumer) override
 	{
+		Debug::Log("[Broadcaster]OnClose");
 	}
 	void OnOpen(mediasoupclient::DataConsumer* dataConsumer) override
 	{
+		Debug::Log("[Broadcaster]OnOpen");
 	}
 	void OnTransportClose(mediasoupclient::DataConsumer* dataConsumer) override
 	{
+		Debug::Log("[Broadcaster]OnTransportClose");
 	}
 
 	/* Virtual methods inherited from DataProducer::Listener */
@@ -99,13 +107,13 @@ public:
 
 	~Broadcaster();
 
-private:
+
 	mediasoupclient::Device device;
 	mediasoupclient::SendTransport* sendTransport{ nullptr };
 	mediasoupclient::RecvTransport* recvTransport{ nullptr };
 	mediasoupclient::DataProducer* dataProducer{ nullptr };
 	mediasoupclient::DataConsumer* dataConsumer{ nullptr };
-
+private:
 	std::string id = std::to_string(rtc::CreateRandomId());
 	std::string baseUrl;
 	std::thread sendDataThread;
