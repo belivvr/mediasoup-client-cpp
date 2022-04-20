@@ -1,25 +1,23 @@
 #define WEBRTC_WIN
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
+#define MSC_LOG_TRACE
 
 #include "mediasoupclient.hpp"
 #include "DebugCpp.h"
 #include "Broadcaster.hpp"
+#include "UnityLogger.h"
 using namespace std;
 
-#define DLL_EXPORT_FLAG
-
-#ifdef DLL_EXPORT_FLAG
 #define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT
-#endif
 
 using namespace mediasoupclient;
 
 const string currentDateTime();
 const string currentLogTime();
 void ErrorLogging(exception e, string prefix="");
+
+UnityLogger unityLogger;
 
 extern "C"
 {
@@ -29,6 +27,8 @@ extern "C"
 		try
 		{
 			Debug::Log("mediasoupclient Initialize");
+			Logger::SetHandler(&unityLogger);
+			Logger::SetLogLevel(Logger::LogLevel::LOG_DEBUG);
 			mediasoupclient::Initialize();
 		}
 		catch (exception e)
@@ -1262,9 +1262,11 @@ extern "C"
 		try
 		{
 			string dataString(data, dataSize);
-			Debug::Log("[MakeJsonObject Json]" + dataString, Color::Green);
-			jsonDynamic = new nlohmann::json(dataString);
-			Debug::Log("[MakeJsonObject Get]" + jsonDynamic->dump());
+			Debug::Log("[MakeJsonObject DataInput]" + dataString, Color::Green);
+			jsonDynamic = new nlohmann::json(nlohmann::json::parse(dataString));
+			Debug::Log("[MakeJsonObject DataOutput]" + jsonDynamic->dump());
+			bool isObject = jsonDynamic->is_object();
+			Debug::Log(isObject);
 		}
 		catch (exception e)
 		{

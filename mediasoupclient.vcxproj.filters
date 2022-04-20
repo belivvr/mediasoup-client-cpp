@@ -27,6 +27,9 @@
     <ClCompile Include="DebugCpp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="UnityLogger.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Broadcaster.hpp">
@@ -36,6 +39,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="DebugCpp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UnityLogger.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

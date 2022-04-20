@@ -165,11 +165,13 @@
     <ClCompile Include="DebugCpp.cpp" />
     <ClCompile Include="mediasoupclient.cpp" />
     <ClCompile Include="MediaStreamTrackFactory.cpp" />
+    <ClCompile Include="UnityLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Broadcaster.hpp" />
     <ClInclude Include="DebugCpp.h" />
     <ClInclude Include="MediaStreamTrackFactory.hpp" />
+    <ClInclude Include="UnityLogger.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
