@@ -234,12 +234,14 @@ extern "C"
 			Debug::Log("[CreateSendTransport]iceCandidate : " + iceCandidate.dump());
 			const nlohmann::json dtlsParameter = *dtlsParameters;
 			Debug::Log("[CreateSendTransport]dtlsParameter : " + dtlsParameter.dump());
-			const nlohmann::json sctpParameter = *sctpParameters;
-			Debug::Log("[CreateSendTransport]sctpParams : " + sctpParameter.dump());
 			const nlohmann::json data = appData == nullptr ? nlohmann::json::object() : *appData;
 			Debug::Log("[CreateSendTransport]appData : " + data.dump());
-			if(sctpParameters != nullptr)
+			if (sctpParameters != nullptr)
+			{
+				const nlohmann::json sctpParameter = *sctpParameters;
+				Debug::Log("[CreateSendTransport]sctpParams : " + sctpParameter.dump());
 				transport = device->CreateSendTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, sctpParameter, peerConnectionOptions, data);
+			}
 			else
 				transport = device->CreateSendTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, peerConnectionOptions, data);
 		}
@@ -274,10 +276,13 @@ extern "C"
 			const nlohmann::json iceParameter = *iceParameters;
 			const nlohmann::json iceCandidate = *iceCandidates;
 			const nlohmann::json dtlsParameter = *dtlsParameters;
-			const nlohmann::json sctpParameter = *sctpParameters;
 			const nlohmann::json data = appData == nullptr ? nlohmann::json::object() : *appData;
-			if(sctpParameters == nullptr)
+			if (sctpParameters != nullptr)
+			{
+				const nlohmann::json sctpParameter = *sctpParameters;
+				Debug::Log("[CreateSendTransport]sctpParams : " + sctpParameter.dump());
 				transport = device->CreateRecvTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, sctpParameter, peerConnectionOptions, data);
+			}
 			else
 				transport = device->CreateRecvTransport(listener, Id, iceParameter, iceCandidate, dtlsParameter, peerConnectionOptions, data);
 		}
