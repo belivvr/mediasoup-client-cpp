@@ -10,17 +10,17 @@
 ## Description
 
 mediasoup client for cpp <br/>
-<a href = "https://github.com/versatica/libmediasoupclient">libmediasoupclient</a>'s dll project for unity
+[libmediasoupclient](https://github.com/versatica/libmediasoupclient)'s dll project for unity
 
 ### Structure
-mediasoup-client-cpp(include libmediasoupclient) <-> C# wrapper class <-> Unity
+mediasoup-client-cpp(include libmediasoupclient) &harr; C# wrapper class &harr; Unity
 
 ### Current Work Environment
 - Visual Studio 2019
 - Windows 10
 
 ## Referrence
-- <a href = "https://github.com/versatica/libmediasoupclient">libmediasoupclient</a>
-- <a href = "https://mediasoup.org/documentation/v3/libmediasoupclient/api/">libmediasoupclient API</a>
-- <a href = "https://github.com/versatica/mediasoup-broadcaster-demo">mediasoup-broadcaster-demo</a>
-- <a href = "https://github.com/versatica/libmediasoupclient/commit/8b36a91520a0f6ea3ed506814410176a9fc71d62">How to build libmediasoupclient in windows</a>
+- [libmediasoupclient](https://github.com/versatica/libmediasoupclient)
+- [libmediasoupclient API](https://mediasoup.org/documentation/v3/libmediasoupclient/api/)
+- [mediasoup-broadcaster-demo](https://github.com/versatica/mediasoup-broadcaster-demo)
+- [How to build libmediasoupclient in windows](https://github.com/versatica/libmediasoupclient/commit/8b36a91520a0f6ea3ed506814410176a9fc71d62)
