@@ -139,13 +139,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;MEDIASOUPCLIENT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MEDIASOUPCLIENT_EXPORTS;_WINDOWS;_USRDLL;WEBRTC_WIN;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\Users\dongh\OneDrive\Documents\libmediasoupclient\include;C:\webrtc-checkout\src;C:\webrtc-checkout\src\third_party\abseil-cpp;C:\Users\dongh\OneDrive\Documents\libmediasoupclient\deps\libsdptransform\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\webrtc-checkout\src;C:\webrtc-checkout\src\third_party\abseil-cpp;C:\Users\dongh\OneDrive\Documents\libmediasoupclient\deps\libsdptransform\include;C:\Users\dongh\OneDrive\Documents\libmediasoupclient\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,20 +156,28 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>sdptransform.lib;webrtc.lib;mediasoupclient.lib;secur32.lib;winmm.lib;dmoguids.lib;wmcodecdspuuid.lib;msdmo.lib;Strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\dongh\OneDrive\Documents\libmediasoupclient\build\RelWithDebInfo;C:\Users\dongh\OneDrive\Documents\libmediasoupclient\build\libsdptransform\RelWithDebInfo;C:\webrtc-checkout\src\out\m94_clangTrue\obj;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\webrtc-checkout\src\out\m94_clang_true_test_true\obj;C:\Users\dongh\OneDrive\Documents\libmediasoupclient\build_test\RelWithDebInfo;C:\Users\dongh\OneDrive\Documents\libmediasoupclient\build_test\libsdptransform\RelWithDebInfo;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AssemblyDebug>true</AssemblyDebug>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\webrtc-checkout\src\test\testsupport\ivf_video_frame_generator.cc" />
+    <ClCompile Include="..\mediasoup-broadcaster-demo\deps\libwebrtc\test\frame_generator.cc" />
+    <ClCompile Include="..\mediasoup-broadcaster-demo\deps\libwebrtc\test\test_video_capturer.cc" />
     <ClCompile Include="Broadcaster.cpp" />
+    <ClCompile Include="create_frame_generator.cc" />
     <ClCompile Include="DebugCpp.cpp" />
+    <ClCompile Include="file_utils.cc" />
+    <ClCompile Include="frame_generator_capturer.cc" />
     <ClCompile Include="mediasoupclient.cpp" />
     <ClCompile Include="MediaStreamTrackFactory.cpp" />
     <ClCompile Include="UnityLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\webrtc-checkout\src\test\testsupport\file_utils.h" />
     <ClInclude Include="Broadcaster.hpp" />
     <ClInclude Include="DebugCpp.h" />
     <ClInclude Include="MediaStreamTrackFactory.hpp" />

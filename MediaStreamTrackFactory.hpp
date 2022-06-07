@@ -1,8 +1,9 @@
 #ifndef MSC_TEST_MEDIA_STREAM_TRACK_FACTORY_HPP
 #define MSC_TEST_MEDIA_STREAM_TRACK_FACTORY_HPP
+#define WEBRTC_WIN
+#define NOMINMAX
 
 #include "api/media_stream_interface.h"
-#include "DebugCpp.h"
 
 rtc::scoped_refptr<webrtc::AudioTrackInterface> createAudioTrack(const std::string& label);
 

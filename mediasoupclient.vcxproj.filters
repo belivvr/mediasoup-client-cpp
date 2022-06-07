@@ -30,6 +30,24 @@
     <ClCompile Include="UnityLogger.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="..\mediasoup-broadcaster-demo\deps\libwebrtc\test\frame_generator.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mediasoup-broadcaster-demo\deps\libwebrtc\test\test_video_capturer.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\webrtc-checkout\src\test\testsupport\ivf_video_frame_generator.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="create_frame_generator.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="frame_generator_capturer.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="file_utils.cc">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Broadcaster.hpp">
@@ -42,6 +60,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="UnityLogger.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\webrtc-checkout\src\test\testsupport\file_utils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

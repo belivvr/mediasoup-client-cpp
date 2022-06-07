@@ -1,10 +1,10 @@
-#define WEBRTC_WIN
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
+//#define WEBRTC_WIN
+//#define NOMINMAX
+//#define WIN32_LEAN_AND_MEAN
 #define MSC_LOG_TRACE
 
+
 #include "mediasoupclient.hpp"
-#include "DebugCpp.h"
 #include "Broadcaster.hpp"
 #include "UnityLogger.h"
 using namespace std;
